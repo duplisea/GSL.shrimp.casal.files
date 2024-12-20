@@ -1,0 +1,29 @@
+# Initial model for shrimp, based on Desgagnes et al (2012?)
+
+
+# Population
+!include "Config/Population.csl2"
+
+# Estimation
+!include "Config/Estimation.csl2"
+!include "Config/Estimation_survey.csl2"
+!include "Config/Estimation_fishery.csl2" # removed
+
+# Profiles
+!include "Config/Profiles.csl2"
+
+# Observations
+!include "Config/Observation_survey_Esquiman.csl2"
+!include "Config/Observation_fishery_Esquiman.csl2"
+
+# Reports
+# Exclude this file for projections (to make the projection file smaller and easier to read)
+!include "Config/Reports.csl2"
+
+# Projections 
+# Include this file for projections (to define the projections and have fewer reports)
+# !include "config/projection_reports.csl2"
+# !include "config/projection_Current.csl2"
+# !include "config/projection_TACC.csl2"
+
+

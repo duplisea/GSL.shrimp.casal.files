@@ -1,0 +1,280 @@
+# 2024 model for sept-iles
+
+#INITIALSATION
+
+@model
+min_age 1
+max_age 10
+age_plus TRUE
+base_weight_units tonnes
+initialisation_phases Phase1 init_F
+time_steps Spring SummerAutumn Winter Endstep
+start_year 1990
+final_year 2023
+projection_final_year 2223
+type age
+length_bins 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40
+length_plus TRUE
+threads 1
+
+@categories
+format sex
+names Male PrimiFemale MultiFemale
+age_lengths AgeLength AgeLength AgeLength
+
+@initialisation_phase Phase1
+type Derived
+
+@initialisation_phase init_F
+type iterative
+years 30
+insert_processes Spring()=init_F
+
+@process init_F
+type mortality_initialisation_baranov
+categories Male PrimiFemale MultiFemale
+selectivities  One One One #FishingMale FishingPrimiFemale FishingMultiFemale # One One One # FishingSel FishingSel FishingSel 
+fishing_mortality 0.6
+
+@time_step Spring
+processes   Recruitment 
+
+@time_step SummerAutumn #we're having all the fishing there for now
+processes   Mortality
+
+@time_step Winter
+processes Maturation SexTransition #SexTransitionFinal
+
+@time_step Endstep
+processes Ageing
+
+# Population processes
+@process None
+type null_process 
+
+@process SexTransition #length-based sex transition
+type transition_category
+from Male
+to PrimiFemale
+proportions 1.0
+selectivities TransitionMale
+
+/*
+@process SexTransitionFinal # final sex transition of all males aged 4
+type transition_category
+from Male
+to PrimiFemale
+proportions 1.0
+selectivities TransitionMaleFinal
+*/
+
+@process Maturation #transition of all primi females to multi females after one year, done before the sex transition to stay there one year
+type transition_category
+from PrimiFemale 
+to MultiFemale
+proportions 1.0
+selectivities One
+
+@process Recruitment #all recruitment goes to males
+type recruitment_beverton_holt
+categories Male PrimiFemale MultiFemale
+proportions 1.0 0.0 0.0
+b0 112000 #based on the 2023 risk assessment paper
+recruitment_multipliers 1*34
+steepness 0.3
+ssb SSB
+age 1
+
+@process Ageing
+type ageing
+categories *
+
+@process Mortality
+type mortality_instantaneous
+m 0.8 # changed to match the jabba model #1*3 #1 here because it's multiplied by the age_specific_M to get 0.8 to age 5 and 0.5 after
+relative_m_by_age One # changed to match the jabba model # age_specific_M*3
+time_step_proportions 1 # equivalent of mprops parameter, time of timestep
+categories *
+table catches # updated with 2023 paper values
+year	Fishing
+#1982	3836	
+#1983	3711	
+#1984	4443	
+#1985	4418	
+#1986	4242	
+#1987	5430	
+#1988	6047	
+#1989	6281	
+1990	6839	
+1991	6447	
+1992	4973	
+1993	5654	
+1994	7196	
+1995	9177	
+1996	11306	
+1997	10551	
+1998	10003	
+1999	12487	
+2000	13904	
+2001	12709	
+2002	16108	
+2003	16645	
+2004	20790	
+2005	17664	
+2006	19013	
+2007	16464	
+2008	16325	
+2009	16074	
+2010	15768	
+2011	14646	
+2012	12596	
+2013	14227	
+2014	12440	
+2015	12425	
+2016	12141	
+2017	6946	
+2018	4189	
+2019	4012	
+2020	5101	
+2021	4982	
+2022	3909
+2023	1374	
+end_table
+
+table method
+method      category  	 selectivity  		       u_max  time_step  	penalty
+Fishing     Male  		 FishingMale       		    0.8    SummerAutumn  FisheryCatchMustBeTaken
+Fishing     PrimiFemale  FishingPrimiFemale    	 	0.8    SummerAutumn  FisheryCatchMustBeTaken
+Fishing     MultiFemale  FishingMultiFemale    		0.8    SummerAutumn  FisheryCatchMustBeTaken
+end_table
+
+@derived_quantity SSB
+type biomass
+time_step SummerAutumn
+categories PrimiFemale MultiFemale
+time_step_proportion 0.5
+time_step_proportion_method weighted_sum
+selectivities One One
+
+@derived_quantity Bvuln
+type biomass
+time_step SummerAutumn
+categories Male PrimiFemale MultiFemale
+time_step_proportion 0.5
+time_step_proportion_method weighted_sum
+selectivities FishingMale FishingPrimiFemale FishingMultiFemale # FishingSel FishingSel FishingSel #
+
+# Definition of selectivities
+@selectivity One 
+type constant
+c 1.0
+
+@selectivity TransitionMale
+type logistic
+a50 17.8
+ato95 3.82
+alpha 1.0
+length_based true
+
+@selectivity TransitionMaleFinal
+type knife_edge
+e 4
+alpha 1.0
+
+@selectivity age_specific_M #not used currently to match JABBA
+type all_values
+v 0.8 0.8 0.8 0.8 0.8 0.5 0.5 0.5 0.5 0.5 
+
+# fishing selectivities - independent but at the moment identical, could have different or different catchabilities
+
+/*
+@selectivity FishingSel
+type logistic
+a50 19.8
+ato95 3.8
+alpha 1
+length_based true
+*/
+
+@selectivity FishingMale
+type logistic
+a50 19.8
+ato95 3.8
+alpha 1
+length_based true
+
+@selectivity FishingPrimiFemale
+type logistic
+a50 19.8
+ato95 3.8
+alpha 1
+length_based true
+
+@selectivity FishingMultiFemale
+type logistic
+a50 19.8
+ato95 3.8
+alpha 1
+length_based true
+
+/*
+@selectivity SurveySel #single survey selectivity for now, can have different with different series
+type logistic
+a50 17.94
+ato95 3.12
+alpha 1
+length_based true
+*/
+
+@selectivity SurveyMale #single survey selectivity for now, can have different with different series
+type logistic
+a50 17.94
+ato95 3.12
+alpha 1
+length_based true
+
+@selectivity SurveyPrimiFemale #single survey selectivity for now, can have different with different series
+type logistic
+a50 17.94
+ato95 3.12
+alpha 1
+length_based true
+
+@selectivity SurveyMultiFemale #single survey selectivity for now, can have different with different series
+type logistic
+a50 17.94
+ato95 3.12
+alpha 1
+length_based true
+
+
+# AGE-LENGTH # at the moment same for males and females, females assumed to not grow much, hopefully on the flat part of VB
+@age_length AgeLength
+type von_bertalanffy
+time_step_proportions 0.33 0.33 0.34 0.00
+Linf 25.99
+k 0.377
+t0 0.0997
+cv_first 0.08
+cv_last 0.08
+distribution normal
+length_weight LengthWeight
+
+
+# SIZE-WEIGHT
+@length_weight LengthWeight
+type basic
+units tonnes
+a 0.735e-9
+b 2.92
+
+
+@process DiseaseMortality
+type mortality_disease_rate
+disease_mortality_rate 0
+selectivities FishingMale FishingPrimiFemale FishingMultiFemale
+categories Male PrimiFemale MultiFemale
+year_effect 1 1 1
+years 2021 2022 2023 
+
+

@@ -1,0 +1,20 @@
+
+# Population
+!include "Config/Population.csl2"
+
+# Estimation
+!include "Config/Estimation.csl2"
+!include "Config/Estimation_survey.csl2"
+!include "Config/Estimation_fishery.csl2" # removed
+
+# Profiles
+#!include "Config/Profiles.csl2"
+
+# Observations
+!include "Config/Observation_survey_Anticosti.csl2"
+!include "Config/Observation_fishery_Anticosti.csl2"
+
+# Reports
+# Exclude this file for projections (to make the projection file smaller and easier to read)
+!include "Config/Reports_tabular.csl2"
+

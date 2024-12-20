@@ -1,0 +1,69 @@
+# ESTIMATION: Estimation of selectivities etc. for fisheries
+
+/*
+@estimate
+parameter selectivity[FishingSel].a50
+type uniform
+lower_bound  1
+upper_bound 40
+
+@estimate
+parameter selectivity[FishingSel].ato95
+type uniform
+lower_bound  1
+upper_bound 40
+*/
+
+
+@estimate
+parameter selectivity[FishingMale].a50
+same selectivity[FishingPrimiFemale].a50 selectivity[FishingMultiFemale].a50
+type uniform
+lower_bound  5
+upper_bound 35
+
+@estimate
+parameter selectivity[FishingMale].ato95
+same selectivity[FishingPrimiFemale].ato95 selectivity[FishingMultiFemale].ato95
+type uniform
+lower_bound  1
+upper_bound 40
+
+/*
+@estimate
+parameter selectivity[FishingPrimiFemale].a50
+type uniform
+lower_bound  1
+upper_bound 40
+
+@estimate
+parameter selectivity[FishingPrimiFemale].ato95
+type uniform
+lower_bound  1
+upper_bound 40
+*/
+
+@estimate
+parameter selectivity[FishingPrimiFemale].alpha
+type uniform
+lower_bound  0.1
+upper_bound 10
+
+/*
+@estimate
+parameter selectivity[FishingMultiFemale].a50
+type uniform
+lower_bound  1
+upper_bound 40
+
+@estimate
+parameter selectivity[FishingMultiFemale].ato95
+type uniform
+lower_bound  1
+upper_bound 40
+*/
+@estimate
+parameter selectivity[FishingMultiFemale].alpha
+type uniform
+lower_bound  0.1
+upper_bound  10

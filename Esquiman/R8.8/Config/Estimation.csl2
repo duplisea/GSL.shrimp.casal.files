@@ -1,0 +1,186 @@
+# ESTIMATION: Estimation methods, ageing error, and estimate population parameters
+
+@minimiser betadiff
+type betadiff
+tolerance 0.002 #1e-6 otherwise
+iterations 2500
+covariance TRUE
+active TRUE
+
+@mcmc MCMC
+type random_walk
+start 1
+length 3000000
+keep 1000
+step_size 0.02
+adapt_stepsize_at 50000 100000 200000 500000 1000000
+proposal_distribution t
+df 4
+adapt_stepsize_method ratio
+burn_in 1000000 # =1000*1000
+max_correlation 0.8
+
+# Ageing error
+@ageing_error AgeingError
+type normal
+cv 0.05
+
+# PENALTIES
+@penalty FisheryCatchMustBeTaken
+type process
+log_scale TRUE
+multiplier 100
+
+################################################################
+# Option to implement LOG transformation method for estimating B0
+################################################################
+
+## NOTE: comment out the line "standardise_years 1976:2013" in @process[Recruitment] in population.csl2
+# Parameters
+/*
+@estimate
+parameter process[Recruitment].b0
+estimation_phase 1
+type uniform_log
+lower_bound  10000
+upper_bound  500000
+*/
+
+
+ @estimate 
+ parameter parameter_transformation[logRecruitment].log_parameter
+ lower_bound 10
+ upper_bound 13
+ type uniform
+
+ @parameter_transformation logRecruitment
+ type log
+ parameters process[Recruitment].b0
+ prior_applies_to_restored_parameters FALSE
+
+
+################################################################
+# Implement SIMPLEX transformation method for estimating YCS
+################################################################
+
+/*
+@parameter_transformation Simplex_recruitment_multipliers
+type simplex
+sum_to_one false
+parameters process[Recruitment].recruitment_multipliers{2004:2022} #maybe can estimate based on other data?
+prior_applies_to_restored_parameters true
+
+@estimate
+parameter parameter_transformation[Simplex_recruitment_multipliers].simplex
+#estimation_phase 1
+type lognormal
+mu 1*19
+cv 0.7*19
+lower_bound -5*19
+upper_bound 5*19
+*/
+
+########################
+# M to F transition estimation
+########################
+
+@estimate
+parameter selectivity[TransitionMale].a50
+type uniform
+lower_bound  1
+upper_bound 30
+
+@estimate
+parameter selectivity[TransitionMale].ato95
+type uniform
+lower_bound  1
+upper_bound 40
+
+
+# estimate growth??
+
+@estimate
+parameter age_length[AgeLength].Linf
+type uniform
+lower_bound 10
+upper_bound 35
+
+@estimate
+parameter age_length[AgeLength].k
+type uniform
+lower_bound 0.2
+upper_bound 0.8
+
+
+#######################
+# have time varying M
+#######################
+
+
+@time_varying M_time_var_Male  
+type constant
+parameter process[Mortality].m{Male}
+years  1990:2023
+values 0.8*34
+
+@time_varying M_time_var_Primi  
+type constant
+parameter process[Mortality].m{PrimiFemale}
+years  1990:2023
+values 0.8*34
+
+
+@time_varying M_time_var_Multi  
+type constant
+parameter process[Mortality].m{MultiFemale}
+years  1990:2023
+values 0.8*34
+
+
+@estimate M_varying_94_04_Male
+parameter time_varying[M_time_var_Male].values{1994}
+same  time_varying[M_time_var_Male].values{1995:2004} #time_varying[M_time_var_Primi].values{1994:2004}  time_varying[M_time_var_Multi].values{1994:2004}
+type normal
+mu 0.8
+cv 0.3
+lower_bound 0.2
+upper_bound 1.5
+
+/*
+@estimate M_varying_05_15
+parameter time_varying[M_time_var_Male].values{2005}
+same  time_varying[M_time_var_Male].values{2006:2015} time_varying[M_time_var_Primi].values{2005:2015}  time_varying[M_time_var_Multi].values{2005:2015}
+type normal
+mu 0.7
+cv 0.3
+lower_bound 0.2
+upper_bound 1.5
+*/
+
+@estimate M_varying_15_23_Male
+parameter time_varying[M_time_var_Male].values{2015}
+same  time_varying[M_time_var_Male].values{2016:2023} #time_varying[M_time_var_Primi].values{2015:2023}  time_varying[M_time_var_Multi].values{2015:2023}
+type normal
+mu 0.8
+cv 0.3
+lower_bound 0.2
+upper_bound 1.5
+
+@estimate M_varying_94_04_Female
+parameter time_varying[M_time_var_Primi].values{1994}
+same  time_varying[M_time_var_Primi].values{1995:2004}  time_varying[M_time_var_Multi].values{1994:2004}
+type normal
+mu 0.8
+cv 0.3
+lower_bound 0.2
+upper_bound 1.5
+
+@estimate M_varying_15_23_Female
+parameter time_varying[M_time_var_Primi].values{2015}
+same  time_varying[M_time_var_Primi].values{2016:2023}  time_varying[M_time_var_Multi].values{2015:2023}
+type normal
+mu 0.8
+cv 0.3
+lower_bound 0.2
+upper_bound 1.5
+

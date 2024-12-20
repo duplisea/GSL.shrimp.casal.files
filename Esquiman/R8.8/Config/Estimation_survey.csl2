@@ -1,0 +1,102 @@
+@catchability SurveyqM
+type free
+q 0.5
+
+@catchability SurveyqF
+type free
+q 0.5
+
+@estimate SurveyqM
+parameter catchability[SurveyqM].q
+same catchability[SurveyqF].q
+type normal
+mu 0.8
+cv 0.1
+lower_bound 1e-6
+upper_bound 10
+				
+
+/*
+@estimate SurveyqF
+parameter catchability[SurveyqF].q
+lower_bound 1e-6
+upper_bound 10
+type uniform_log
+*/
+
+/*
+@estimate
+parameter observation[Surveyq].process_error
+lower_bound 0
+upper_bound 2
+type uniform
+#mcmc_fixed True
+*/
+
+/*
+@estimate
+parameter selectivity[SurveySel].a50
+type uniform
+lower_bound  1
+upper_bound 40
+
+@estimate
+parameter selectivity[SurveySel].ato95
+type uniform
+lower_bound  1
+upper_bound 40
+*/
+
+
+@estimate
+parameter selectivity[SurveyMale].a50
+same selectivity[SurveyPrimiFemale].a50 selectivity[SurveyMultiFemale].a50
+type uniform
+lower_bound  1
+upper_bound 30
+
+@estimate
+parameter selectivity[SurveyMale].ato95
+same selectivity[SurveyPrimiFemale].ato95 selectivity[SurveyMultiFemale].ato95
+type uniform
+lower_bound  1
+upper_bound 40
+
+/*
+@estimate
+parameter selectivity[SurveyPrimiFemale].a50
+type uniform
+lower_bound  1
+upper_bound 40
+
+@estimate
+parameter selectivity[SurveyPrimiFemale].ato95
+type uniform
+lower_bound  1
+upper_bound 40
+
+@estimate
+parameter selectivity[SurveyPrimiFemale].alpha
+type uniform
+lower_bound  0.1
+upper_bound  100
+
+@estimate
+parameter selectivity[SurveyMultiFemale].a50
+type uniform
+lower_bound  1
+upper_bound 40
+
+@estimate
+parameter selectivity[SurveyMultiFemale].ato95
+type uniform
+lower_bound  1
+upper_bound 40
+
+@estimate
+parameter selectivity[SurveyMultiFemale].alpha
+type uniform
+lower_bound  0.1
+upper_bound  100
+
+*/
